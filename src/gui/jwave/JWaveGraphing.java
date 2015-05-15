@@ -25,24 +25,32 @@ package gui.jwave;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 
 import math.jwave.Transform;
+import math.jwave.TransformBuilder;
+import math.jwave.transforms.AncientEgyptianDecomposition;
 import math.jwave.transforms.BasicTransform;
-import math.jwave.transforms.FastWaveletTransform;
-import math.jwave.transforms.WaveletPacketTransform;
-import math.jwave.transforms.wavelets.Wavelet;
-import math.jwave.transforms.wavelets.haar.Haar1;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.BoxLayout;
+import javax.swing.JScrollPane;
 
 public class JWaveGraphing extends JFrame {
 
@@ -58,14 +66,15 @@ public class JWaveGraphing extends JFrame {
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 15.05.2015 23:00:37
    */
-  private String _selectedTransform = "";
-  private String _selectedWavelet = "";
+  protected String _selectedTransform = "Fast Wavelet Transform";
+  protected String _selectedWavelet = "Haar";
 
   /**
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 15.05.2015 22:22:26
    */
   private JPanel _contentPane;
+  private JScrollPane _scrollPane = new JScrollPane( );
 
   /**
    * @author Christian Scheiblich (cscheiblich@gmail.com)
@@ -78,6 +87,7 @@ public class JWaveGraphing extends JFrame {
    * @date 15.05.2015 22:47:45
    */
   private JMenu _menuMain = new JMenu( "main" );
+  private JMenuItem _menuItemLoad = new JMenuItem( "load" );
   private JMenuItem _menuItemExit = new JMenuItem( "exit" );
 
   /**
@@ -109,6 +119,19 @@ public class JWaveGraphing extends JFrame {
    */
   private JMenu _menuHelp = new JMenu( "Help" );
   private JMenuItem _menuItemVersion = new JMenuItem( "version" );
+
+  /**
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 15.05.2015 23:38:06
+   */
+  private final JButton _buttonForward = new JButton( "forward" );
+  private final JButton _buttonReverse = new JButton( "reverse" );
+
+  /**
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 15.05.2015 23:49:19
+   */
+  protected BufferedImage _bufferedImage = null;
 
   /**
    * Launch the application.
@@ -153,29 +176,44 @@ public class JWaveGraphing extends JFrame {
     _menuBar.add( _menuMain );
     _menuItemExit.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent arg0 ) {
-
-        // raw drop
-        System.exit( 0 );
-
+        System.exit( 0 ); // raw drop
       }
     } );
+    _menuItemLoad.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+
+        JFileChooser jFileChooser = new JFileChooser( );
+        int returnVal = jFileChooser.showOpenDialog( _contentPane );
+        if( returnVal == JFileChooser.APPROVE_OPTION ) {
+
+          File file = jFileChooser.getSelectedFile( );
+
+          _bufferedImage = loadBufferedImage( file );
+
+          _contentPane.removeAll( );
+
+          paintBufferedImage( _contentPane, _bufferedImage );
+
+          _contentPane.updateUI( );
+
+        } // if
+      }
+    } );
+
+    _menuMain.add( _menuItemLoad );
     _menuMain.add( _menuItemExit );
 
     // algorithm
     _menuBar.add( _menuAlgorithm );
     _menuItemFWT.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
-
         _selectedTransform = "Fast Wavelet Transform";
-
       }
     } );
     _menuAlgorithm.add( _menuItemFWT );
     _menuItemWPT.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
-
         _selectedTransform = "Wavelet Packet Transform";
-
       }
     } );
     _menuAlgorithm.add( _menuItemWPT );
@@ -214,28 +252,160 @@ public class JWaveGraphing extends JFrame {
       }
     } );
     _menuCoiflet.add( _menuItemCoif1 );
-    _menuItemCoif2.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+    _menuItemCoif2.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
         _selectedWavelet = "Coiflet 2";
-}
-    });
+      }
+    } );
     _menuCoiflet.add( _menuItemCoif2 );
-    _menuItemCoif3.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+    _menuItemCoif3.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
         _selectedWavelet = "Coiflet 3";
       }
-    });
+    } );
     _menuCoiflet.add( _menuItemCoif3 );
 
     // help
     _menuBar.add( _menuHelp );
+    _menuItemVersion.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+
+        // pop up a window with version
+
+      }
+    } );
     _menuHelp.add( _menuItemVersion );
+
+    _buttonForward.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+
+        // quick an dirty
+        Transform t =
+            TransformBuilder.create( _selectedTransform, _selectedWavelet );
+        BasicTransform basicTransform = t.getBasicTransform( );
+        t = new Transform( new AncientEgyptianDecomposition( basicTransform ) );
+
+        int width = _bufferedImage.getWidth( );
+        int height = _bufferedImage.getHeight( );
+
+        int[ ][ ] arrImageRGBintger = convertTo2DUsingGetRGB( _bufferedImage );
+
+      }
+    } );
+
+    _menuBar.add( _buttonForward );
+    _buttonReverse.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+
+        Transform t =
+            TransformBuilder.create( _selectedTransform, _selectedWavelet );
+
+        // TODO reverse transform of data - not given yet
+
+      }
+    } );
+
+    _menuBar.add( _buttonReverse );
 
     _contentPane = new JPanel( );
     _contentPane.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
     setContentPane( _contentPane );
-    _contentPane.setLayout( new BoxLayout( _contentPane, BoxLayout.X_AXIS ) );
+    _contentPane.setLayout( new BorderLayout( 0, 0 ) );
+    _contentPane.add( _scrollPane, BorderLayout.CENTER );
 
   } // JWaveGraphing
 
+  /**
+   * loading from File to a buffered image
+   * 
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 15.05.2015 23:47:37
+   * @param file
+   * @return
+   */
+  protected BufferedImage loadBufferedImage( File file ) {
+
+    BufferedImage bufferedImage = null;
+    try {
+      bufferedImage = ImageIO.read( file );
+    } catch( IOException exception ) {
+      exception.printStackTrace( );
+    } // try
+
+    return bufferedImage;
+
+  } // loadBufferedImage
+
+  protected void paintBufferedImage( JPanel contentPanel,
+      BufferedImage bufferedImage ) {
+
+    contentPanel.add( new JLabel( new ImageIcon( bufferedImage ) ) );
+
+  } // paintBufferedImage
+
+  /**
+   * convert image to rgb
+   *
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 16.05.2015 00:23:09 
+   *
+   * @param image
+   * @return
+   */
+  private int[ ][ ] convertTo2DUsingGetRGB( BufferedImage image ) {
+    int width = image.getWidth( );
+    int height = image.getHeight( );
+    int[ ][ ] result = new int[ height ][ width ];
+
+    for( int row = 0; row < height; row++ ) {
+      for( int col = 0; col < width; col++ ) {
+        result[ row ][ col ] = image.getRGB( row, col );
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * convert integer matrix to double matrix
+   *
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 16.05.2015 00:24:24 
+   *
+   * @param mat
+   * @return
+   */
+  private double[ ][ ] convertIntMat2DblMat( int[ ][ ] mat ) {
+
+    double[ ][ ] dblMat = new double[ mat.length ][ mat[ 0 ].length ];
+
+    for( int i = 0; i < mat.length; i++ )
+      for( int j = 0; j < mat[ 0 ].length; j++ )
+        dblMat[ i ][ j ] = (double)mat[ i ][ j ];
+
+    return dblMat;
+
+  }
+
+  /**
+   * convert double matrix to integer matrix
+   *
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 16.05.2015 00:24:40 
+   *
+   * @param mat
+   * @return
+   */
+  private int[ ][ ] convertDblMat2IntMat( double[ ][ ] mat ) {
+
+    int[ ][ ] intMat = new int[ mat.length ][ mat[ 0 ].length ];
+
+    for( int i = 0; i < mat.length; i++ )
+      for( int j = 0; j < mat[ 0 ].length; j++ )
+        intMat[ i ][ j ] = (int)mat[ i ][ j ];
+
+    return intMat;
+
+  }
+  
 } // JWaveGraphing
