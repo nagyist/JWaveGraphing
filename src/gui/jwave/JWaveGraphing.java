@@ -288,7 +288,15 @@ public class JWaveGraphing extends JFrame {
         int width = _bufferedImage.getWidth( );
         int height = _bufferedImage.getHeight( );
 
-        int[ ][ ] arrImageRGBintger = convertTo2DUsingGetRGB( _bufferedImage );
+        int[ ][ ] matImageRGBintger = convertTo2DUsingGetRGB( _bufferedImage );
+        double[ ][ ] matImagRGBdouble =
+            convertIntMat2DblMat( matImageRGBintger );
+
+        double[ ][ ] matImageRGBdoubleForward = t.forward( matImagRGBdouble );
+        
+        int[][] matImageRGBintegerForward = convertDblMat2IntMat( matImageRGBdoubleForward );
+        
+        
 
       }
     } );
@@ -345,10 +353,9 @@ public class JWaveGraphing extends JFrame {
 
   /**
    * convert image to rgb
-   *
+   * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
-   * @date 16.05.2015 00:23:09 
-   *
+   * @date 16.05.2015 00:23:09
    * @param image
    * @return
    */
@@ -368,10 +375,9 @@ public class JWaveGraphing extends JFrame {
 
   /**
    * convert integer matrix to double matrix
-   *
+   * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
-   * @date 16.05.2015 00:24:24 
-   *
+   * @date 16.05.2015 00:24:24
    * @param mat
    * @return
    */
@@ -389,10 +395,9 @@ public class JWaveGraphing extends JFrame {
 
   /**
    * convert double matrix to integer matrix
-   *
+   * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
-   * @date 16.05.2015 00:24:40 
-   *
+   * @date 16.05.2015 00:24:40
    * @param mat
    * @return
    */
@@ -407,5 +412,5 @@ public class JWaveGraphing extends JFrame {
     return intMat;
 
   }
-  
+
 } // JWaveGraphing
