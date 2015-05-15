@@ -32,8 +32,17 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+
+import math.jwave.Transform;
+import math.jwave.transforms.BasicTransform;
+import math.jwave.transforms.FastWaveletTransform;
+import math.jwave.transforms.WaveletPacketTransform;
+import math.jwave.transforms.wavelets.Wavelet;
+import math.jwave.transforms.wavelets.haar.Haar1;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.BoxLayout;
 
 public class JWaveGraphing extends JFrame {
 
@@ -42,6 +51,15 @@ public class JWaveGraphing extends JFrame {
    * @date 15.05.2015 22:22:10
    */
   private static final long serialVersionUID = 2038965267122479551L;
+
+  /**
+   * JWave objects - Transform, BasicTransform, and Wavelet.
+   * 
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 15.05.2015 23:00:37
+   */
+  private String _selectedTransform = "";
+  private String _selectedWavelet = "";
 
   /**
    * @author Christian Scheiblich (cscheiblich@gmail.com)
@@ -77,13 +95,13 @@ public class JWaveGraphing extends JFrame {
   private JMenu _menuWavelet = new JMenu( "Wavelet" );
   private JMenuItem _menuItemHaar = new JMenuItem( "Haar" );
   private JMenu _menuDaubechies = new JMenu( "Daubechies" );
-  private JMenuItem _menuItemDaub2 = new JMenuItem( "Daub2" );
-  private JMenuItem _menuItemDaub3 = new JMenuItem( "Daub3" );
-  private JMenuItem _menuItemDaub4 = new JMenuItem( "Daub4" );
+  private JMenuItem _menuItemDaub2 = new JMenuItem( "Daubechies 2" );
+  private JMenuItem _menuItemDaub3 = new JMenuItem( "Daubechies 3" );
+  private JMenuItem _menuItemDaub4 = new JMenuItem( "Daubechies 4" );
   private JMenu _menuCoiflet = new JMenu( "Coiflet" );
-  private JMenuItem _menuItemCoif1 = new JMenuItem( "Coif1" );
-  private JMenuItem _menuItemCoif2 = new JMenuItem( "Coif2" );
-  private JMenuItem _menuItemCoif3 = new JMenuItem( "Coif3" );
+  private JMenuItem _menuItemCoif1 = new JMenuItem( "Coiflet 1" );
+  private JMenuItem _menuItemCoif2 = new JMenuItem( "Coiflet 2" );
+  private JMenuItem _menuItemCoif3 = new JMenuItem( "Coiflet 3" );
 
   /**
    * @author Christian Scheiblich (cscheiblich@gmail.com)
@@ -145,19 +163,68 @@ public class JWaveGraphing extends JFrame {
 
     // algorithm
     _menuBar.add( _menuAlgorithm );
+    _menuItemFWT.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+
+        _selectedTransform = "Fast Wavelet Transform";
+
+      }
+    } );
     _menuAlgorithm.add( _menuItemFWT );
+    _menuItemWPT.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+
+        _selectedTransform = "Wavelet Packet Transform";
+
+      }
+    } );
     _menuAlgorithm.add( _menuItemWPT );
 
     // wavelet
     _menuBar.add( _menuWavelet );
+    _menuItemHaar.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedWavelet = "Haar";
+      }
+    } );
     _menuWavelet.add( _menuItemHaar );
     _menuWavelet.add( _menuDaubechies );
+    _menuItemDaub2.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedWavelet = "Daubechies 2";
+      }
+    } );
     _menuDaubechies.add( _menuItemDaub2 );
+    _menuItemDaub3.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedWavelet = "Daubechies 3";
+      }
+    } );
     _menuDaubechies.add( _menuItemDaub3 );
+    _menuItemDaub4.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedWavelet = "Daubechies 4";
+      }
+    } );
     _menuDaubechies.add( _menuItemDaub4 );
     _menuWavelet.add( _menuCoiflet );
+    _menuItemCoif1.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedWavelet = "Coiflet 1";
+      }
+    } );
     _menuCoiflet.add( _menuItemCoif1 );
+    _menuItemCoif2.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _selectedWavelet = "Coiflet 2";
+}
+    });
     _menuCoiflet.add( _menuItemCoif2 );
+    _menuItemCoif3.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _selectedWavelet = "Coiflet 3";
+      }
+    });
     _menuCoiflet.add( _menuItemCoif3 );
 
     // help
@@ -166,8 +233,8 @@ public class JWaveGraphing extends JFrame {
 
     _contentPane = new JPanel( );
     _contentPane.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
-    _contentPane.setLayout( new BorderLayout( 0, 0 ) );
     setContentPane( _contentPane );
+    _contentPane.setLayout( new BoxLayout( _contentPane, BoxLayout.X_AXIS ) );
 
   } // JWaveGraphing
 
