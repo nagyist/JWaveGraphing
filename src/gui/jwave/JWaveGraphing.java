@@ -281,15 +281,15 @@ public class JWaveGraphing extends JFrame {
         int width = _bufferedImage.getWidth( );
         int height = _bufferedImage.getHeight( );
 
-//        int[ ] arrDeCompWidth = null;
-//        int[ ] arrDeCompHeight = null;
-//
-//        try {
-//          arrDeCompWidth = MathToolKit.decompose( width );
-//          arrDeCompHeight = MathToolKit.decompose( height );
-//        } catch( JWaveException e1 ) {
-//          e1.printStackTrace( );
-//        }
+        //        int[ ] arrDeCompWidth = null;
+        //        int[ ] arrDeCompHeight = null;
+        //
+        //        try {
+        //          arrDeCompWidth = MathToolKit.decompose( width );
+        //          arrDeCompHeight = MathToolKit.decompose( height );
+        //        } catch( JWaveException e1 ) {
+        //          e1.printStackTrace( );
+        //        }
 
         int[ ][ ] matImageRGBintger =
             convertBufferdImage2matixIntegerCodedRGB( _bufferedImage );
@@ -303,17 +303,20 @@ public class JWaveGraphing extends JFrame {
             convertDblMat2IntMat( matImageRGBdoubleForward );
 
         // TODO some bug due to getRGB of BufferedImage ..
-        BufferedImage bufferedImage = new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bufferedImage =
+            new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
         for( int i = 0; i < matImageRGBintegerForward.length; i++ ) {
           for( int j = 0; j < matImageRGBintegerForward[ 0 ].length; j++ ) {
             int pixel = matImageRGBintegerForward[ j ][ i ];
             bufferedImage.setRGB( i, j, pixel );
           }
         }
-        
+
         _contentPanel.removeAll( );
         paintBufferedImage( _contentPanel, bufferedImage );
         _contentPanel.updateUI( );
+
+        _bufferedImage = bufferedImage;
 
       }
     } );
@@ -322,10 +325,38 @@ public class JWaveGraphing extends JFrame {
     _buttonReverse.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
 
-//        Transform t =
-//            TransformBuilder.create( _selectedTransform, _selectedWavelet );
+        Transform t =
+            TransformBuilder.create( _selectedTransform, _selectedWavelet );
 
-        // TODO reverse transform of data - not given yet
+        int width = _bufferedImage.getWidth( );
+        int height = _bufferedImage.getHeight( );
+
+        int[ ][ ] matImageRGBintger =
+            convertBufferdImage2matixIntegerCodedRGB( _bufferedImage );
+
+        double[ ][ ] matImagRGBdouble =
+            convertIntMat2DblMat( matImageRGBintger );
+
+        double[ ][ ] matImageRGBdoubleForward = t.reverse( matImagRGBdouble );
+
+        int[ ][ ] matImageRGBintegerForward =
+            convertDblMat2IntMat( matImageRGBdoubleForward );
+
+        // TODO some bug due to getRGB of BufferedImage ..
+        BufferedImage bufferedImage =
+            new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
+        for( int i = 0; i < matImageRGBintegerForward.length; i++ ) {
+          for( int j = 0; j < matImageRGBintegerForward[ 0 ].length; j++ ) {
+            int pixel = matImageRGBintegerForward[ j ][ i ];
+            bufferedImage.setRGB( i, j, pixel );
+          }
+        }
+
+        _contentPanel.removeAll( );
+        paintBufferedImage( _contentPanel, bufferedImage );
+        _contentPanel.updateUI( );
+
+        _bufferedImage = bufferedImage;
 
       }
     } );
