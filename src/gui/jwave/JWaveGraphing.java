@@ -25,11 +25,9 @@ package gui.jwave;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.IOException;
 
@@ -43,14 +41,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
 import math.jwave.Transform;
 import math.jwave.TransformBuilder;
-import math.jwave.transforms.AncientEgyptianDecomposition;
-import math.jwave.transforms.BasicTransform;
-
-import javax.swing.JScrollPane;
 
 public class JWaveGraphing extends JFrame {
 
@@ -73,7 +68,7 @@ public class JWaveGraphing extends JFrame {
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 15.05.2015 22:22:26
    */
-  private JPanel _contentPane;
+  private JPanel _contentPanel;
   private JScrollPane _scrollPane = new JScrollPane( );
 
   /**
@@ -183,18 +178,16 @@ public class JWaveGraphing extends JFrame {
       public void actionPerformed( ActionEvent e ) {
 
         JFileChooser jFileChooser = new JFileChooser( );
-        int returnVal = jFileChooser.showOpenDialog( _contentPane );
+        int returnVal = jFileChooser.showOpenDialog( _contentPanel );
         if( returnVal == JFileChooser.APPROVE_OPTION ) {
 
           File file = jFileChooser.getSelectedFile( );
 
           _bufferedImage = loadBufferedImage( file );
 
-          _contentPane.removeAll( );
-
-          paintBufferedImage( _contentPane, _bufferedImage );
-
-          _contentPane.updateUI( );
+          _contentPanel.removeAll( );
+          paintBufferedImage( _contentPanel, _bufferedImage );
+          _contentPanel.updateUI( );
 
         } // if
       }
@@ -282,21 +275,45 @@ public class JWaveGraphing extends JFrame {
         // quick an dirty
         Transform t =
             TransformBuilder.create( _selectedTransform, _selectedWavelet );
-        BasicTransform basicTransform = t.getBasicTransform( );
-        t = new Transform( new AncientEgyptianDecomposition( basicTransform ) );
+        //        BasicTransform basicTransform = t.getBasicTransform( );
+        //        t = new Transform( new AncientEgyptianDecomposition( basicTransform ) );
 
         int width = _bufferedImage.getWidth( );
         int height = _bufferedImage.getHeight( );
 
-        int[ ][ ] matImageRGBintger = convertTo2DUsingGetRGB( _bufferedImage );
+//        int[ ] arrDeCompWidth = null;
+//        int[ ] arrDeCompHeight = null;
+//
+//        try {
+//          arrDeCompWidth = MathToolKit.decompose( width );
+//          arrDeCompHeight = MathToolKit.decompose( height );
+//        } catch( JWaveException e1 ) {
+//          e1.printStackTrace( );
+//        }
+
+        int[ ][ ] matImageRGBintger =
+            convertBufferdImage2matixIntegerCodedRGB( _bufferedImage );
+
         double[ ][ ] matImagRGBdouble =
             convertIntMat2DblMat( matImageRGBintger );
 
         double[ ][ ] matImageRGBdoubleForward = t.forward( matImagRGBdouble );
+
+        int[ ][ ] matImageRGBintegerForward =
+            convertDblMat2IntMat( matImageRGBdoubleForward );
+
+        // TODO some bug due to getRGB of BufferedImage ..
+        BufferedImage bufferedImage = new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB);
+        for( int i = 0; i < matImageRGBintegerForward.length; i++ ) {
+          for( int j = 0; j < matImageRGBintegerForward[ 0 ].length; j++ ) {
+            int pixel = matImageRGBintegerForward[ j ][ i ];
+            bufferedImage.setRGB( i, j, pixel );
+          }
+        }
         
-        int[][] matImageRGBintegerForward = convertDblMat2IntMat( matImageRGBdoubleForward );
-        
-        
+        _contentPanel.removeAll( );
+        paintBufferedImage( _contentPanel, bufferedImage );
+        _contentPanel.updateUI( );
 
       }
     } );
@@ -305,8 +322,8 @@ public class JWaveGraphing extends JFrame {
     _buttonReverse.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
 
-        Transform t =
-            TransformBuilder.create( _selectedTransform, _selectedWavelet );
+//        Transform t =
+//            TransformBuilder.create( _selectedTransform, _selectedWavelet );
 
         // TODO reverse transform of data - not given yet
 
@@ -315,11 +332,11 @@ public class JWaveGraphing extends JFrame {
 
     _menuBar.add( _buttonReverse );
 
-    _contentPane = new JPanel( );
-    _contentPane.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
-    setContentPane( _contentPane );
-    _contentPane.setLayout( new BorderLayout( 0, 0 ) );
-    _contentPane.add( _scrollPane, BorderLayout.CENTER );
+    _contentPanel = new JPanel( );
+    _contentPanel.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
+    setContentPane( _contentPanel );
+    _contentPanel.setLayout( new BorderLayout( 0, 0 ) );
+    _contentPanel.add( _scrollPane, BorderLayout.CENTER );
 
   } // JWaveGraphing
 
@@ -359,18 +376,41 @@ public class JWaveGraphing extends JFrame {
    * @param image
    * @return
    */
-  private int[ ][ ] convertTo2DUsingGetRGB( BufferedImage image ) {
+  private int[ ][ ] convertBufferdImage2matixIntegerCodedRGB(
+      BufferedImage image ) {
+
     int width = image.getWidth( );
     int height = image.getHeight( );
-    int[ ][ ] result = new int[ height ][ width ];
+
+    // Color color = new Color( image.getRGB(  x, y ) );
+    // Color[][] colors = new Color[ width ][ height ];
+
+    int[ ][ ] matIntCodedRGB = new int[ width ][ height ];
+
+    //    22222222 111111
+    //    bitpos    32109876 54321098 76543210
+    //    ------------------------------------
+    //    bits      RRRRRRRR GGGGGGGG BBBBBBBB
+
+    // Components will be in the range of 0..255:
+    //    int blue = color & 0xff;
+    //    int green = ( color & 0xff00 ) >> 8;
+    //    int red = ( color & 0xff0000 ) >> 16;
+
+    //    Your color is color = -16755216 which has:
+    //
+    //      blue : 240         // Strong blue
+    //      green:  85         // A little green mixed in
+    //      red  :   0         // No red component at all
+    //      alpha: 255         // Completely opaque
 
     for( int row = 0; row < height; row++ ) {
       for( int col = 0; col < width; col++ ) {
-        result[ row ][ col ] = image.getRGB( row, col );
+        matIntCodedRGB[ col ][ row ] = image.getRGB( col, row );
       }
     }
 
-    return result;
+    return matIntCodedRGB;
   }
 
   /**
