@@ -47,13 +47,31 @@ import javax.swing.border.EmptyBorder;
 import math.jwave.Transform;
 import math.jwave.TransformBuilder;
 
+/**
+ * JWaveGraphing - a GUI for using JWave library on images.
+ * 
+ * @author Christian Scheiblich (cscheiblich@gmail.com)
+ * @date 16.05.2015 19:56:19
+ */
 public class JWaveGraphing extends JFrame {
+
+  private final String _version = "0.11"; // version of JWaveGraphing
+  private final String _date = "16.05.2015"; // date of release
+  private final String _author = "Christian Scheiblich"; // author name
+  private final String _email = "cscheiblich@gmail.com"; // author email
 
   /**
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 15.05.2015 22:22:10
    */
   private static final long serialVersionUID = 2038965267122479551L;
+
+  /**
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 15.05.2015 22:22:26
+   */
+  private JPanel _contentPanel;
+  private JScrollPane _scrollPane = new JScrollPane( );
 
   /**
    * JWave objects - Transform, BasicTransform, and Wavelet.
@@ -63,13 +81,6 @@ public class JWaveGraphing extends JFrame {
    */
   protected String _selectedTransform = "Fast Wavelet Transform";
   protected String _selectedWavelet = "Haar";
-
-  /**
-   * @author Christian Scheiblich (cscheiblich@gmail.com)
-   * @date 15.05.2015 22:22:26
-   */
-  private JPanel _contentPanel;
-  private JScrollPane _scrollPane = new JScrollPane( );
 
   /**
    * @author Christian Scheiblich (cscheiblich@gmail.com)
@@ -92,12 +103,13 @@ public class JWaveGraphing extends JFrame {
   private JMenu _menuAlgorithm = new JMenu( "algorithm" );
   private JMenuItem _menuItemFWT = new JMenuItem( "Fast Wavelet Transform" );
   private JMenuItem _menuItemWPT = new JMenuItem( "Wavelet Packet Transform" );
+  private JMenuItem _menuItemDFT = new JMenuItem( "Discrete Fourier Transform" );
 
   /**
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 15.05.2015 22:50:55
    */
-  private JMenu _menuWavelet = new JMenu( "Wavelet" );
+  private JMenu _menuWavelet = new JMenu( "wavelet" );
   private JMenuItem _menuItemHaar = new JMenuItem( "Haar" );
   private JMenu _menuDaubechies = new JMenu( "Daubechies" );
   private JMenuItem _menuItemDaub2 = new JMenuItem( "Daubechies 2" );
@@ -112,8 +124,12 @@ public class JWaveGraphing extends JFrame {
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 15.05.2015 22:51:44
    */
-  private JMenu _menuHelp = new JMenu( "Help" );
-  private JMenuItem _menuItemVersion = new JMenuItem( "version" );
+  private final JMenu _menuAbout = new JMenu( "about" );
+  private final JMenuItem _menuItemVersion = new JMenuItem( "version: "
+      + _version );
+  private final JMenuItem _menuItemDate = new JMenuItem( "date: " + _date );
+  private final JMenuItem _menuItemAuthor = new JMenuItem( _author );
+  private final JMenuItem _menuItemEmail = new JMenuItem( _email );
 
   /**
    * @author Christian Scheiblich (cscheiblich@gmail.com)
@@ -198,6 +214,13 @@ public class JWaveGraphing extends JFrame {
 
     // algorithm
     _menuBar.add( _menuAlgorithm );
+    _menuItemDFT.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedTransform = "Discrete Fourier Transform";
+      }
+    } );
+
+    _menuAlgorithm.add( _menuItemDFT );
     _menuItemFWT.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
         _selectedTransform = "Fast Wavelet Transform";
@@ -238,6 +261,7 @@ public class JWaveGraphing extends JFrame {
       }
     } );
     _menuDaubechies.add( _menuItemDaub4 );
+
     _menuWavelet.add( _menuCoiflet );
     _menuItemCoif1.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
@@ -259,15 +283,15 @@ public class JWaveGraphing extends JFrame {
     _menuCoiflet.add( _menuItemCoif3 );
 
     // help
-    _menuBar.add( _menuHelp );
-    _menuItemVersion.addActionListener( new ActionListener( ) {
-      public void actionPerformed( ActionEvent e ) {
-
-        // pop up a window with version
-
-      }
-    } );
-    _menuHelp.add( _menuItemVersion );
+    _menuBar.add( _menuAbout );
+    _menuItemVersion.setEnabled( false );
+    _menuAbout.add( _menuItemVersion );
+    _menuItemDate.setEnabled( false );
+    _menuAbout.add( _menuItemDate );
+    _menuItemAuthor.setEnabled( false );
+    _menuAbout.add( _menuItemAuthor );
+    _menuItemEmail.setEnabled( false );
+    _menuAbout.add( _menuItemEmail );
 
     _buttonForward.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
@@ -275,8 +299,6 @@ public class JWaveGraphing extends JFrame {
         // quick an dirty
         Transform t =
             TransformBuilder.create( _selectedTransform, _selectedWavelet );
-        //        BasicTransform basicTransform = t.getBasicTransform( );
-        //        t = new Transform( new AncientEgyptianDecomposition( basicTransform ) );
 
         int width = _bufferedImage.getWidth( );
         int height = _bufferedImage.getHeight( );
@@ -322,6 +344,7 @@ public class JWaveGraphing extends JFrame {
     } );
 
     _menuBar.add( _buttonForward );
+
     _buttonReverse.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
 
@@ -360,7 +383,6 @@ public class JWaveGraphing extends JFrame {
 
       }
     } );
-
     _menuBar.add( _buttonReverse );
 
     _contentPanel = new JPanel( );
