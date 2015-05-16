@@ -55,7 +55,7 @@ import math.jwave.TransformBuilder;
  */
 public class JWaveGraphing extends JFrame {
 
-  private final String _version = "0.11"; // version of JWaveGraphing
+  private final String _version = "0.12"; // version of JWaveGraphing
   private final String _date = "16.05.2015"; // date of release
   private final String _author = "Christian Scheiblich"; // author name
   private final String _email = "cscheiblich@gmail.com"; // author email
@@ -111,15 +111,22 @@ public class JWaveGraphing extends JFrame {
    */
   private JMenu _menuWavelet = new JMenu( "wavelet" );
   private JMenuItem _menuItemHaar = new JMenuItem( "Haar" );
+
   private JMenu _menuDaubechies = new JMenu( "Daubechies" );
   private JMenuItem _menuItemDaub2 = new JMenuItem( "Daubechies 2" );
   private JMenuItem _menuItemDaub3 = new JMenuItem( "Daubechies 3" );
   private JMenuItem _menuItemDaub4 = new JMenuItem( "Daubechies 4" );
+  private JMenuItem _menuItemDaub5 = new JMenuItem( "Daubechies 5" );
+  private JMenuItem _menuItemDaub20 = new JMenuItem( "Daubechies 20" );
+
   private JMenu _menuCoiflet = new JMenu( "Coiflet" );
   private JMenuItem _menuItemCoif1 = new JMenuItem( "Coiflet 1" );
   private JMenuItem _menuItemCoif2 = new JMenuItem( "Coiflet 2" );
   private JMenuItem _menuItemCoif3 = new JMenuItem( "Coiflet 3" );
 
+  private final JMenu _menuSymlets = new JMenu( "Symlets" );
+  private final JMenuItem _menuItemSym2 = new JMenuItem( "Symlet 2" );
+  private final JMenuItem _menuItemSym20 = new JMenuItem( "Symlet 20" );
   /**
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 15.05.2015 22:51:44
@@ -234,7 +241,7 @@ public class JWaveGraphing extends JFrame {
     } );
     _menuAlgorithm.add( _menuItemWPT );
 
-    // wavelet
+    // Haar Wavelet
     _menuBar.add( _menuWavelet );
     _menuItemHaar.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
@@ -242,6 +249,8 @@ public class JWaveGraphing extends JFrame {
       }
     } );
     _menuWavelet.add( _menuItemHaar );
+
+    // Daubechies Wavelets
     _menuWavelet.add( _menuDaubechies );
     _menuItemDaub2.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
@@ -261,7 +270,20 @@ public class JWaveGraphing extends JFrame {
       }
     } );
     _menuDaubechies.add( _menuItemDaub4 );
+    _menuItemDaub5.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedWavelet = "Daubechies 5";
+      }
+    } );
+    _menuDaubechies.add( _menuItemDaub5 );
+    _menuItemDaub20.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedWavelet = "Daubechies 20";
+      }
+    } );
+    _menuDaubechies.add( _menuItemDaub20 );
 
+    // Coiflet Wavelets
     _menuWavelet.add( _menuCoiflet );
     _menuItemCoif1.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
@@ -281,6 +303,21 @@ public class JWaveGraphing extends JFrame {
       }
     } );
     _menuCoiflet.add( _menuItemCoif3 );
+
+    // Symlets Wavelets
+    _menuWavelet.add( _menuSymlets );
+    _menuItemSym2.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedWavelet = "Symlet 2";
+      }
+    } );
+    _menuSymlets.add( _menuItemSym2 );
+    _menuItemSym20.addActionListener( new ActionListener( ) {
+      public void actionPerformed( ActionEvent e ) {
+        _selectedWavelet = "Symlet 20";
+      }
+    } );
+    _menuSymlets.add( _menuItemSym20 );
 
     // help
     _menuBar.add( _menuAbout );
