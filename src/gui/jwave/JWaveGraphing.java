@@ -333,6 +333,9 @@ public class JWaveGraphing extends JFrame {
     _buttonForward.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
 
+        if( _bufferedImage == null )
+          return;
+
         // quick an dirty
         Transform t =
             TransformBuilder.create( _selectedTransform, _selectedWavelet );
@@ -384,6 +387,9 @@ public class JWaveGraphing extends JFrame {
 
     _buttonReverse.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
+
+        if( _bufferedImage == null )
+          return;
 
         Transform t =
             TransformBuilder.create( _selectedTransform, _selectedWavelet );
