@@ -55,7 +55,7 @@ import math.jwave.TransformBuilder;
  */
 public class JWaveGraphing extends JFrame {
 
-  private final String _version = "0.12"; // version of JWaveGraphing
+  private final String _version = "0.13"; // version of JWaveGraphing
   private final String _date = "16.05.2015"; // date of release
   private final String _author = "Christian Scheiblich"; // author name
   private final String _email = "cscheiblich@gmail.com"; // author email
@@ -70,7 +70,7 @@ public class JWaveGraphing extends JFrame {
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 15.05.2015 22:22:26
    */
-  private JPanel _contentPanel;
+  private JPanel _contentPane;
   private JScrollPane _scrollPane = new JScrollPane( );
 
   /**
@@ -201,16 +201,16 @@ public class JWaveGraphing extends JFrame {
       public void actionPerformed( ActionEvent e ) {
 
         JFileChooser jFileChooser = new JFileChooser( );
-        int returnVal = jFileChooser.showOpenDialog( _contentPanel );
+        int returnVal = jFileChooser.showOpenDialog( _contentPane );
         if( returnVal == JFileChooser.APPROVE_OPTION ) {
 
           File file = jFileChooser.getSelectedFile( );
 
           _bufferedImage = loadBufferedImage( file );
 
-          _contentPanel.removeAll( );
-          paintBufferedImage( _contentPanel, _bufferedImage );
-          _contentPanel.updateUI( );
+          _contentPane.removeAll( );
+          paintBufferedImage( _contentPane, _bufferedImage );
+          _contentPane.updateUI( );
 
         } // if
       }
@@ -333,52 +333,17 @@ public class JWaveGraphing extends JFrame {
     _buttonForward.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
 
-        if( _bufferedImage == null )
+        BufferedImage transformedBufferedImage =
+            transformForwardByARGBintArr( _bufferedImage );
+
+        if( transformedBufferedImage == null )
           return;
 
-        // quick an dirty
-        Transform t =
-            TransformBuilder.create( _selectedTransform, _selectedWavelet );
+        _contentPane.removeAll( );
+        paintBufferedImage( _contentPane, transformedBufferedImage );
+        _contentPane.updateUI( );
 
-        int width = _bufferedImage.getWidth( );
-        int height = _bufferedImage.getHeight( );
-
-        //        int[ ] arrDeCompWidth = null;
-        //        int[ ] arrDeCompHeight = null;
-        //
-        //        try {
-        //          arrDeCompWidth = MathToolKit.decompose( width );
-        //          arrDeCompHeight = MathToolKit.decompose( height );
-        //        } catch( JWaveException e1 ) {
-        //          e1.printStackTrace( );
-        //        }
-
-        int[ ][ ] matImageRGBintger =
-            convertBufferdImage2matixIntegerCodedRGB( _bufferedImage );
-
-        double[ ][ ] matImagRGBdouble =
-            convertIntMat2DblMat( matImageRGBintger );
-
-        double[ ][ ] matImageRGBdoubleForward = t.forward( matImagRGBdouble );
-
-        int[ ][ ] matImageRGBintegerForward =
-            convertDblMat2IntMat( matImageRGBdoubleForward );
-
-        // TODO some bug due to getRGB of BufferedImage ..
-        BufferedImage bufferedImage =
-            new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
-        for( int i = 0; i < matImageRGBintegerForward.length; i++ ) {
-          for( int j = 0; j < matImageRGBintegerForward[ 0 ].length; j++ ) {
-            int pixel = matImageRGBintegerForward[ j ][ i ];
-            bufferedImage.setRGB( i, j, pixel );
-          }
-        }
-
-        _contentPanel.removeAll( );
-        paintBufferedImage( _contentPanel, bufferedImage );
-        _contentPanel.updateUI( );
-
-        _bufferedImage = bufferedImage;
+        _bufferedImage = transformedBufferedImage;
 
       }
     } );
@@ -388,51 +353,27 @@ public class JWaveGraphing extends JFrame {
     _buttonReverse.addActionListener( new ActionListener( ) {
       public void actionPerformed( ActionEvent e ) {
 
-        if( _bufferedImage == null )
+        BufferedImage transformedBufferedImage =
+            transformReverseByARGBintArr( _bufferedImage );
+
+        if( transformedBufferedImage == null )
           return;
 
-        Transform t =
-            TransformBuilder.create( _selectedTransform, _selectedWavelet );
+        _contentPane.removeAll( );
+        paintBufferedImage( _contentPane, transformedBufferedImage );
+        _contentPane.updateUI( );
 
-        int width = _bufferedImage.getWidth( );
-        int height = _bufferedImage.getHeight( );
-
-        int[ ][ ] matImageRGBintger =
-            convertBufferdImage2matixIntegerCodedRGB( _bufferedImage );
-
-        double[ ][ ] matImagRGBdouble =
-            convertIntMat2DblMat( matImageRGBintger );
-
-        double[ ][ ] matImageRGBdoubleForward = t.reverse( matImagRGBdouble );
-
-        int[ ][ ] matImageRGBintegerForward =
-            convertDblMat2IntMat( matImageRGBdoubleForward );
-
-        // TODO some bug due to getRGB of BufferedImage ..
-        BufferedImage bufferedImage =
-            new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
-        for( int i = 0; i < matImageRGBintegerForward.length; i++ ) {
-          for( int j = 0; j < matImageRGBintegerForward[ 0 ].length; j++ ) {
-            int pixel = matImageRGBintegerForward[ j ][ i ];
-            bufferedImage.setRGB( i, j, pixel );
-          }
-        }
-
-        _contentPanel.removeAll( );
-        paintBufferedImage( _contentPanel, bufferedImage );
-        _contentPanel.updateUI( );
-
-        _bufferedImage = bufferedImage;
+        _bufferedImage = transformedBufferedImage;
 
       }
     } );
     _menuBar.add( _buttonReverse );
 
-    _contentPanel = new JPanel( );
-    _contentPanel.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
-    setContentPane( _contentPanel );
-    _contentPanel.setLayout( new BorderLayout( 0, 0 ) );
-    _contentPanel.add( _scrollPane, BorderLayout.CENTER );
+    _contentPane = new JPanel( );
+    _contentPane.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
+    setContentPane( _contentPane );
+    _contentPane.setLayout( new BorderLayout( 0, 0 ) );
+    _contentPane.add( _scrollPane, BorderLayout.CENTER );
 
   } // JWaveGraphing
 
@@ -457,22 +398,127 @@ public class JWaveGraphing extends JFrame {
 
   } // loadBufferedImage
 
-  protected void paintBufferedImage( JPanel contentPanel,
+  protected void paintBufferedImage( JPanel contentPane,
       BufferedImage bufferedImage ) {
 
-    contentPanel.add( new JLabel( new ImageIcon( bufferedImage ) ) );
+    contentPane.add( new JLabel( new ImageIcon( bufferedImage ) ) );
 
   } // paintBufferedImage
 
   /**
-   * convert image to rgb
+   * Transform a BufferedImage of size 2^p x 2^q | p,q € N using a selected
+   * transform and a selected wavelet. However, the BufferedIamge is convert to
+   * integer values of 24 bit range. This results in rounding errors, that
+   * appears as a broken transform, but it is not!
+   * 
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 17.05.2015 10:02:36
+   * @param bufferedImage
+   * @return
+   */
+  protected BufferedImage transformForwardByARGBintArr(
+      BufferedImage bufferedImage ) {
+
+    if( bufferedImage == null )
+      return null;
+
+    // quick an dirty
+    Transform t =
+        TransformBuilder.create( _selectedTransform, _selectedWavelet );
+
+    int width = bufferedImage.getWidth( );
+    int height = bufferedImage.getHeight( );
+
+    //        int[ ] arrDeCompWidth = null;
+    //        int[ ] arrDeCompHeight = null;
+    //
+    //        try {
+    //          arrDeCompWidth = MathToolKit.decompose( width );
+    //          arrDeCompHeight = MathToolKit.decompose( height );
+    //        } catch( JWaveException e1 ) {
+    //          e1.printStackTrace( );
+    //        }
+
+    int[ ][ ] matImageRGBintger =
+        convertBufferdImage2matixIntegerCodedARGB( bufferedImage );
+
+    double[ ][ ] matImagRGBdouble = castIntMat2DblMat( matImageRGBintger );
+
+    double[ ][ ] matImageRGBdoubleForward = t.forward( matImagRGBdouble );
+
+    int[ ][ ] matImageRGBintegerForward =
+        castDblMat2IntMat( matImageRGBdoubleForward );
+
+    // TODO some bug due to getRGB of BufferedImage ..
+    BufferedImage transformedBufferedImage =
+        new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
+    for( int i = 0; i < matImageRGBintegerForward.length; i++ ) {
+      for( int j = 0; j < matImageRGBintegerForward[ 0 ].length; j++ ) {
+        int pixel = matImageRGBintegerForward[ j ][ i ];
+        transformedBufferedImage.setRGB( i, j, pixel );
+      }
+    }
+
+    return transformedBufferedImage;
+
+  } // transformForwardByARGBintArr
+
+  /**
+   * Transform a BufferedImage of size 2^p x 2^q | p,q € N using a selected
+   * transform and a selected wavelet. However, the BufferedIamge is convert to
+   * integer values of 24 bit range. This results in rounding errors, that
+   * appears as a broken transform, but it is not! *
+   * 
+   * @author Christian Scheiblich (cscheiblich@gmail.com)
+   * @date 17.05.2015 10:04:16
+   * @param bufferedImage
+   * @return
+   */
+  protected BufferedImage transformReverseByARGBintArr(
+      BufferedImage bufferedImage ) {
+
+    if( bufferedImage == null )
+      return null;
+
+    Transform t =
+        TransformBuilder.create( _selectedTransform, _selectedWavelet );
+
+    int width = bufferedImage.getWidth( );
+    int height = bufferedImage.getHeight( );
+
+    int[ ][ ] matImageRGBintger =
+        convertBufferdImage2matixIntegerCodedARGB( bufferedImage );
+
+    double[ ][ ] matImagRGBdouble = castIntMat2DblMat( matImageRGBintger );
+
+    double[ ][ ] matImageRGBdoubleForward = t.reverse( matImagRGBdouble );
+
+    int[ ][ ] matImageRGBintegerForward =
+        castDblMat2IntMat( matImageRGBdoubleForward );
+
+    // TODO some bug due to getRGB of BufferedImage ..
+    BufferedImage transformedBufferedImage =
+        new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
+    for( int i = 0; i < matImageRGBintegerForward.length; i++ ) {
+      for( int j = 0; j < matImageRGBintegerForward[ 0 ].length; j++ ) {
+        int pixel = matImageRGBintegerForward[ j ][ i ];
+        transformedBufferedImage.setRGB( i, j, pixel );
+      }
+    }
+
+    return transformedBufferedImage;
+
+  } // transformReverseByARGBintArr
+
+  /**
+   * convert image to ARGB
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 16.05.2015 00:23:09
    * @param image
    * @return
    */
-  private int[ ][ ] convertBufferdImage2matixIntegerCodedRGB(
+  private int[ ][ ] convertBufferdImage2matixIntegerCodedARGB(
       BufferedImage image ) {
 
     int width = image.getWidth( );
@@ -507,17 +553,18 @@ public class JWaveGraphing extends JFrame {
     }
 
     return matIntCodedRGB;
-  }
+
+  } // convertBufferdImage2matixIntegerCodedARGB
 
   /**
-   * convert integer matrix to double matrix
+   * cast integer matrix to double matrix
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 16.05.2015 00:24:24
    * @param mat
    * @return
    */
-  private double[ ][ ] convertIntMat2DblMat( int[ ][ ] mat ) {
+  private double[ ][ ] castIntMat2DblMat( int[ ][ ] mat ) {
 
     double[ ][ ] dblMat = new double[ mat.length ][ mat[ 0 ].length ];
 
@@ -527,17 +574,17 @@ public class JWaveGraphing extends JFrame {
 
     return dblMat;
 
-  }
+  } // castIntMat2DblMat
 
   /**
-   * convert double matrix to integer matrix
+   * cast double matrix to integer matrix
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 16.05.2015 00:24:40
    * @param mat
    * @return
    */
-  private int[ ][ ] convertDblMat2IntMat( double[ ][ ] mat ) {
+  private int[ ][ ] castDblMat2IntMat( double[ ][ ] mat ) {
 
     int[ ][ ] intMat = new int[ mat.length ][ mat[ 0 ].length ];
 
@@ -547,6 +594,6 @@ public class JWaveGraphing extends JFrame {
 
     return intMat;
 
-  }
+  } // castDblMat2IntMat
 
 } // JWaveGraphing
